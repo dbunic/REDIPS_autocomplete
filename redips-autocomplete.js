@@ -43,7 +43,7 @@ REDIPS.autocomplete = (function () {
 		body.appendChild(redips_autocomplete);
 		// set reference to the invisible div (after page is loaded)
 		div = document.getElementById('redips_autocomplete');
-console.log('hi');
+console.log('hi1');
 	};
 
 
