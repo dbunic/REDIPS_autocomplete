@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<title>www.redips.net</title>
+	<meta name="author" content="Darko Bunic"/>
+	<meta name="description" content="Autocomplete without AJAX"/>
+	<script type="text/javascript" src="redips-autocomplete.js"></script>
+	<script type="text/javascript">
+		// add onload event listener
+		if (window.addEventListener) {
+			window.addEventListener('load', REDIPS.autocomplete.init, false);
+		}
+		else if (window.attachEvent) {
+			window.attachEvent('onload', REDIPS.autocomplete.init);
+		}
+	</script>
+	<style>
+		body{
+			font-family: Arial, Helvetica, sans-serif;
+		}
+		/* box */  
+		#autocomplete{  
+			position: absolute;  
+			width: 185px;  
+			height: 90px;  
+			visibility: hidden;
+			background-color: white;
+		}
+		/* define text paragraphs */
+		p{
+			width: 500px;
+			text-align: justify;
+		}  
+	</style>
+</head>
+
+<body>
+	<!-- hidden div for autocomplete -->
+	<!-- it should be in one line because first child node should be "iframe" not "\n" (find "firstChild" in script.js) -->
+	<div id="autocomplete" onmouseover="javascript:setFocus()"><iframe marginwidth="0" marginheight="0" frameborder="0" width="100%" height="100%" scrolling="no"></iframe></div>
+	
+	<center>
+		<h1><a href="http://www.redips.net/javascript/autocomplete/">www.redips.net</a></h1>
+		<h2>Autocomplete without AJAX</h2>
+
+		<p>
+			Please try enter any text to the input fields. It should work in IE6, FF and Google
+			Chrome. Example uses PHP to generate random autocomplete answers.
+		</p>
+		
+		<div>
+			<input type="text" name="field1" onkeydown="autocomplete(this, event)" onblur="hidePopup()"/>
+			<input type="text" name="filed2" onkeydown="autocomplete(this, event)" onblur="hidePopup()"/>
+		</div>
+		
+		<select id="test">
+			<option>Google Chrome</option>
+			<option>FireFox</option>
+			<option>Internet Explorer</option>
+			<option disabled="disabled">Debugging select box</option>
+			<option disabled="disabled">to check IE bug.</option>
+		</select>
+
+
+		<p >If you want to use this autocomplete, follow simple instructions:
+		<div style="width: 530px; text-align: left">
+		<ol>
+		<li>Include script.js file to the HTML page (only 70 lines).</li>
+		<li>In source code you will find "hidden" div. Just copy it below BODY tag.</li>
+		<li>Make div hidden - apply styles to the div with id="autocomplete".</li>
+		<li>Add onkeydown and onblur event handlers to the input fields. Don't forget to set name to the input field.</li>
+		<li>Add logic to the answers.php for typed text.</li>
+		</ol>
+		<div>
+		
+	</center>
+</body>
+</html>
