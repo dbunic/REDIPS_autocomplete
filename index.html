@@ -22,7 +22,14 @@
 		p{
 			width: 500px;
 			text-align: justify;
-		}  
+		}
+		/* set width for the second input field */
+		.myinput {
+			width: 250px;
+		}
+		#test {
+			margin-top: 5px;
+		}
 	</style>
 </head>
 
@@ -38,7 +45,7 @@
 		
 		<div>
 			<input type="text" name="field1" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()"/>
-			<input type="text" name="filed2" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()"/>
+			<input type="text" name="filed2" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()" class="myinput"/>
 		</div>
 		
 		<select id="test">

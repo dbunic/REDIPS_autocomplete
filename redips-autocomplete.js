@@ -18,18 +18,18 @@ var REDIPS = REDIPS || {};
 REDIPS.autocomplete = (function () {
 		// method declaration
 	var	init,
-		keydown,
-		setFocus,
 		show,
 		hide,
-		selected22,			// selected item (called from iframe)
+		focus,
+		keydown,
 		selected,
+		sendURL,
 		// properties
 		div,						// reference to the div that contains iframe 
 		oInput,						// current input field
 		timer = null,				// timer reference (needed to cancel previous call)
-		delay = 500,				// time to wait after last typed char to send request (milliseconds)
 		stayVisible = 0,			// div visibility flag
+		delay = 500,				// time to wait after last typed char to send request (milliseconds)
 		url = 'redips-autocomplete.php?query=';	// autocomplete url 
 
 
@@ -39,7 +39,7 @@ REDIPS.autocomplete = (function () {
 			redips_autocomplete = document.createElement('div');	// create autocomplete DIV element
 		// set id, autofocus and style attribures
 		redips_autocomplete.setAttribute('id', 'redips_autocomplete');
-		redips_autocomplete.setAttribute('onmouseover', 'REDIPS.autocomplete.setFocus()');
+		redips_autocomplete.setAttribute('onmouseover', 'REDIPS.autocomplete.focus()');
 		redips_autocomplete.setAttribute('style', 'position:absolute;width:185px;height:90px;visibility:hidden;background-color:white;');
 		// set inner HTML
 		redips_autocomplete.innerHTML = '<iframe marginwidth="0" marginheight="0" frameborder="0" width="100%" height="100%" scrolling="no"></iframe>';
@@ -50,101 +50,9 @@ REDIPS.autocomplete = (function () {
 	};
 
 
-	// called on keydown event in input field
-	keydown = function (field, e) {
-		// private function called if delete or backspace is pressed
-		var newPopup = function () {
-			// cancel previous call if there is any
-			if (timer !== null) {
-				clearTimeout(timer);
-			}
-			// set new popup call
-			timer = setTimeout(function () {
-				// define oTop, oLeft and box variables  
-				var oTop = 0,
-					oLeft = 0,  
-					box = oInput;
-				// if user deletes content from input box, then hide popup and return
-				if (oInput.value.length === 0) {
-					hide();
-					return;
-				}
-				// find input field position and set popup position  
-				do {
-					oLeft += box.offsetLeft - box.scrollLeft;
-					oTop += box.offsetTop - box.scrollTop;
-					box = box.offsetParent;
-				}
-				while (box && box.nodeName !== 'BODY');
-				// set top and left position of DIV element regarding input element
-				div.style.top  = (oTop + 22) + 'px';  
-				div.style.left = oLeft + 'px';
-				// find iframe in DIV and set src attribute with parameters query and field name
-				div.getElementsByTagName('iframe')[0].src = url + oInput.value + '&fname=' + oInput.name;
-			}, REDIPS.autocomplete.delay);
-		};
-		// set current input field
-		oInput = field;
-		switch (e.keyCode || window.event.keyCode) {
-		// tab, enter, shift, ctrl, alt, pause, caps lock
-		case 9:
-		case 13:
-		case 16:
-		case 17:
-		case 18:
-		case 19:
-		case 20:
-		// page up, page down, end, home, arrow left, arrow up, arrow right
-		case 33:
-		case 34:
-		case 35:
-		case 36:
-		case 37:
-		case 38:
-		case 39:
-		// insert, scroll lock
-		case 45:
-		case 145:
-		// F1,F2,F3,F4,F5,F6
-		case 112:
-		case 113:
-		case 114:
-		case 115:
-		case 116:
-		case 117:
-		// F7,F8,F9,F10,F11,F12
-		case 118:
-		case 119:
-		case 120:
-		case 121:
-		case 122:
-		case 123: 
-			break;
-		// escape (hide div element)
-		case 27:
-			hide();
-			break;
-		// arrow down (set focus to the multiple select)
-		case 40:
-			setFocus();
-			break;
-		// backspace, delete
-		case 8:
-		case 46:
-			newPopup();
-			break;
-		//  and default
-		default:
-			newPopup();
-			break;
-		}
-	};
-
-
-	// set focus to the multiple select (contentWindow works for IE6 and FF)
-	setFocus = function () {
-		stayVisible = 1; // set stayVisible flag (needed for onblur event on input field)
-		div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
+	// show popup
+	show = function () {
+		div.style.visibility = 'visible';
 	};
 
 
@@ -163,26 +71,88 @@ REDIPS.autocomplete = (function () {
 	};
 
 
-	// show popup
-	show = function () {
-		div.style.visibility = 'visible';
+	// set focus to the multiple select (contentWindow works for IE6 and FF)
+	focus = function () {
+		stayVisible = 1; // set stayVisible flag (needed for onblur event on input field)
+		div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
 	};
 
 
-	// called on keydown event in multiple select (from iframe)
-	selected22 = function (oSelect, e) {
-		switch (e.keyCode || window.event.keyCode) {
-		// escape, backspace (hide popup and set focus to the input field)
-		case 27:
-		case 8:
-			hide();
-			oInput.focus();
-			break;
-		// tab, return (set value to the input field)
-		case 9:
-		case 13:
-			selected(oSelect);
-			break;
+	// called on keydown event in input field and in iframe with shown options
+	keydown = function (field, e) {
+		// set current input field
+		oInput = field;
+		// keydown in input field
+		if (field.nodeName === 'INPUT') {
+			switch (e.keyCode || window.event.keyCode) {
+			// tab, enter, shift, ctrl, alt, pause, caps lock
+			case 9:
+			case 13:
+			case 16:
+			case 17:
+			case 18:
+			case 19:
+			case 20:
+			// page up, page down, end, home, arrow left, arrow up, arrow right
+			case 33:
+			case 34:
+			case 35:
+			case 36:
+			case 37:
+			case 38:
+			case 39:
+			// insert, scroll lock
+			case 45:
+			case 145:
+			// F1,F2,F3,F4,F5,F6
+			case 112:
+			case 113:
+			case 114:
+			case 115:
+			case 116:
+			case 117:
+			// F7,F8,F9,F10,F11,F12
+			case 118:
+			case 119:
+			case 120:
+			case 121:
+			case 122:
+			case 123: 
+				break;
+			// escape (hide div element)
+			case 27:
+				hide();
+				break;
+			// arrow down (set focus to the multiple select)
+			case 40:
+				focus();
+				break;
+			// backspace, delete
+			case 8:
+			case 46:
+				sendURL();
+				break;
+			//  and default
+			default:
+				sendURL();
+				break;
+			}
+		}
+		// call from iframe
+		else {
+			switch (e.keyCode || window.event.keyCode) {
+			// escape, backspace (hide popup and set focus to the input field)
+			case 27:
+			case 8:
+				hide();
+				oInput.focus();
+				break;
+			// tab, return (set value to the input field)
+			case 9:
+			case 13:
+				selected(field);
+				break;
+			}
 		}
 	};
 
@@ -194,6 +164,42 @@ REDIPS.autocomplete = (function () {
 		div.style.visibility = 'hidden';
 		oInput.focus();
 	};
+
+
+	// private function called if delete or backspace is pressed
+	sendURL = function () {
+		// cancel previous call if there is any
+		if (timer !== null) {
+			clearTimeout(timer);
+		}
+		// set new popup call
+		timer = setTimeout(function () {
+			// define oTop, oLeft and box variables  
+			var oTop = 0,
+				oLeft = 0,  
+				box = oInput;
+			// if user deletes content from input box, then hide popup and return
+			if (oInput.value.length === 0) {
+				hide();
+				return;
+			}
+			// find input field position
+			do {
+				oLeft += box.offsetLeft;
+				oTop += box.offsetTop;
+				box = box.offsetParent;
+			}
+			while (box && box.nodeName !== 'BODY');
+			// set top and left position of DIV element regarding to input element
+			div.style.top = (oTop + oInput.offsetHeight) + 'px';
+			div.style.left = oLeft + 'px';
+			// set width to the DIV element the same as width of the input field
+			div.style.width = oInput.offsetWidth + 'px';
+			// find iframe in DIV and set src attribute with parameters query and field name
+			div.getElementsByTagName('iframe')[0].src = url + oInput.value + '&fname=' + oInput.name;
+		}, REDIPS.autocomplete.delay);
+	};
+
 
 	return {
 		/**
@@ -212,11 +218,11 @@ REDIPS.autocomplete = (function () {
 		url : url,
 		/* public methods (documented in main code) */
 		init : init,
-		keydown : keydown,
 		show : show,
 		hide : hide,
-		selected : selected,
-		setFocus : setFocus
+		focus : focus,
+		keydown : keydown,
+		selected : selected
 		
 	};
 }());
