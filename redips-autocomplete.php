@@ -1,9 +1,9 @@
 <html>
-<body onload="javascript:top.div.style.visibility = 'visible'">
+<body onload="javascript:top.REDIPS.autocomplete.show()">
 <select multiple 
-ondblclick = "javascript:top.setValue(this)"
+ondblclick = "javascript:top.REDIPS.autocomplete.value(this)"
 onkeydown  = "javascript:top.keydown(this,event)"
-onblur     = "javascript:top.hidePopup()"
+onblur     = "javascript:top.REDIPS.autocomplete.hide()"
 style      = "width:100%; height:100%">
 
 <?php

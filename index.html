@@ -18,14 +18,6 @@
 		body{
 			font-family: Arial, Helvetica, sans-serif;
 		}
-		/* box */  
-		#autocomplete{  
-			position: absolute;  
-			width: 185px;  
-			height: 90px;  
-			visibility: hidden;
-			background-color: white;
-		}
 		/* define text paragraphs */
 		p{
 			width: 500px;
@@ -35,10 +27,6 @@
 </head>
 
 <body>
-	<!-- hidden div for autocomplete -->
-	<!-- it should be in one line because first child node should be "iframe" not "\n" (find "firstChild" in script.js) -->
-	<div id="autocomplete" onmouseover="javascript:setFocus()"><iframe marginwidth="0" marginheight="0" frameborder="0" width="100%" height="100%" scrolling="no"></iframe></div>
-	
 	<center>
 		<h1><a href="http://www.redips.net/javascript/autocomplete/">www.redips.net</a></h1>
 		<h2>Autocomplete without AJAX</h2>
@@ -49,8 +37,8 @@
 		</p>
 		
 		<div>
-			<input type="text" name="field1" onkeydown="autocomplete(this, event)" onblur="hidePopup()"/>
-			<input type="text" name="filed2" onkeydown="autocomplete(this, event)" onblur="hidePopup()"/>
+			<input type="text" name="field1" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()"/>
+			<input type="text" name="filed2" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()"/>
 		</div>
 		
 		<select id="test">
