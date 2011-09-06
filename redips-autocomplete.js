@@ -15,12 +15,20 @@ Sep 05, 2011.
 // create REDIPS namespace (if is not already defined in another REDIPS package)
 var REDIPS = REDIPS || {};
 
+/**
+ * @namespace
+ * @description REDIPS.autocomplete is a simple JavaScript library with autocomplete functionallity.
+ * @name REDIPS.autocomplete
+ * @author Darko Bunic
+ * @see
+ * <a href="http://www.redips.net/javascript/autocomplete/">Autocomplete without AJAX</a>
+ * @version 1.5.1
+ */
 REDIPS.autocomplete = (function () {
 		// method declaration
 	var	init,
 		show,
 		hide,
-		focus,
 		keydown,
 		selected,
 		sendURL,
@@ -28,19 +36,26 @@ REDIPS.autocomplete = (function () {
 		div,						// reference to the div that contains iframe 
 		oInput,						// current input field
 		timer = null,				// timer reference (needed to cancel previous call)
-		stayVisible = 0,			// div visibility flag
+		visible = false,			// div visibility flag
+		// public properties
 		delay = 500,				// time to wait after last typed char to send request (milliseconds)
+		height = 130,				// default height of popup
 		url = 'redips-autocomplete.php?query=';	// autocomplete url 
 
 
-	// initialization
+	/**
+	 * REDIPS.autocomplete initialization. DIV element with id="redips_autocomplete" is appended to the page (needed for iframe to show options below input field).
+	 * @public
+	 * @function
+	 * @name REDIPS.autocomplete#init
+	 */
 	init = function () {
 		var body = document.getElementsByTagName('body')[0],		// set reference to the BODY element
 			redips_autocomplete = document.createElement('div');	// create autocomplete DIV element
 		// set id, autofocus and style attribures
 		redips_autocomplete.setAttribute('id', 'redips_autocomplete');
 		redips_autocomplete.setAttribute('onmouseover', 'REDIPS.autocomplete.focus()');
-		redips_autocomplete.setAttribute('style', 'position:absolute;width:185px;height:90px;visibility:hidden;background-color:white;');
+		redips_autocomplete.setAttribute('style', 'position:absolute;visibility:hidden;background-color:white;height:' + REDIPS.autocomplete.height + 'px');
 		// set inner HTML
 		redips_autocomplete.innerHTML = '<iframe marginwidth="0" marginheight="0" frameborder="0" width="100%" height="100%" scrolling="no"></iframe>';
 		// append dialog box and shade to the page body
@@ -50,16 +65,28 @@ REDIPS.autocomplete = (function () {
 	};
 
 
-	// show popup
+	/**
+	 * Method shows popup (autocomplete DIV) in a moment when iframe is loaded. Only iframe calls this function from "onload" event.
+	 * Popup hieght is defined with REDIPS.autocomplete.height public property.
+	 * @see <a href="#height">REDIPS.autocomplete.height</a>
+	 * @public
+	 * @function
+	 * @name REDIPS.autocomplete#show
+	 */
 	show = function () {
 		div.style.visibility = 'visible';
 	};
 
 
-	// hide popup
+	/**
+	 * Method hides popup in a moment when user presses ESCAPE key or popup looses focus.
+	 * @public
+	 * @function
+	 * @name REDIPS.autocomplete#hide
+	 */
 	hide = function () {
-		if (stayVisible === 1) {
-			stayVisible = 0;
+		if (visible) {
+			visible = false;
 			return;
 		}
 		// cancel previous call
@@ -71,19 +98,22 @@ REDIPS.autocomplete = (function () {
 	};
 
 
-	// set focus to the multiple select (contentWindow works for IE6 and FF)
-	focus = function () {
-		stayVisible = 1; // set stayVisible flag (needed for onblur event on input field)
-		div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
-	};
-
-
-	// called on keydown event in input field and in iframe with shown options
+	/**
+	 * keydown() method is called on every key down in input field and popup.
+	 * In a moment when popup is shown below input field, it's possible to change focus to popup with "arrow down".
+	 * Arrow down and arrow up will change highlighting of current item.
+	 * Pressing ENTER will copy current item to the input box while pressing ESCAPE will close popup and return focus to the input field.
+	 * @param {HTMLElement} field Input element or multiple select element (if called from iframe).
+	 * @param {Event} e Event information.
+	 * @public
+	 * @function
+	 * @name REDIPS.autocomplete#keydown
+	 */
 	keydown = function (field, e) {
-		// set current input field
-		oInput = field;
 		// keydown in input field
 		if (field.nodeName === 'INPUT') {
+			// set current input field
+			oInput = field;
 			switch (e.keyCode || window.event.keyCode) {
 			// tab, enter, shift, ctrl, alt, pause, caps lock
 			case 9:
@@ -123,9 +153,12 @@ REDIPS.autocomplete = (function () {
 			case 27:
 				hide();
 				break;
-			// arrow down (set focus to the multiple select)
+			// arrow down
+			// set visible flag to "true" and set focus to the multiple select
+			// visible flag is needed in hide()
 			case 40:
-				focus();
+				visible = true; 
+				div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
 				break;
 			// backspace, delete
 			case 8:
@@ -157,7 +190,15 @@ REDIPS.autocomplete = (function () {
 	};
 
 
-	// set value to the input box (used by keydown and ondblclick event)
+	/**
+	 * Method copies the current item from multiple select to the input field.
+	 * Input parameter is reference to the multiple select.
+	 * This method is called from iframe on dblclick event or from keydown() method if ENTER or TAB key was pressed.
+	 * @param {HTMLElement} oSelect Multiple select element.
+	 * @public
+	 * @function
+	 * @name REDIPS.autocomplete#selected
+	 */
 	selected = function (oSelect) {
 		var idx = oSelect.selectedIndex;
 		oInput.value = oSelect.options[idx].text;
@@ -167,6 +208,16 @@ REDIPS.autocomplete = (function () {
 
 
 	// private function called if delete or backspace is pressed
+	/**
+	 * sendURL() is a private method called on every text change in input field.
+	 * After every character input, timer is restarted (default timeout is set to 500ms).
+	 * When timer finishes, sendURL will send URL to query reply from the server.
+	 * Reply from server will be displayed to the popup below input field.
+	 * Timer value can be modified with REDIPS.autocomplete.delay property.
+	 * @see <a href="#delay">REDIPS.autocomplete.delay</a>
+	 * @private
+	 * @memberOf REDIPS.autocomplete#
+	 */
 	sendURL = function () {
 		// cancel previous call if there is any
 		if (timer !== null) {
@@ -216,11 +267,17 @@ REDIPS.autocomplete = (function () {
 		 * @default "redips-autocomplete.php?query="
 		 */
 		url : url,
-		/* public methods (documented in main code) */
+		/**
+		 * Popup height (px).
+		 * @type Integer
+		 * @name REDIPS.autocomplete#height
+		 * @default 130
+		 */
+		height : height,
+		/* public methods are documented in main code */
 		init : init,
 		show : show,
 		hide : hide,
-		focus : focus,
 		keydown : keydown,
 		selected : selected
 		
