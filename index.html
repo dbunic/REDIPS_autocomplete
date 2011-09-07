@@ -4,7 +4,7 @@
 	<title>www.redips.net</title>
 	<meta name="author" content="Darko Bunic"/>
 	<meta name="description" content="Autocomplete without AJAX"/>
-	<script type="text/javascript" src="redips-autocomplete.js"></script>
+	<script type="text/javascript" src="redips-autocomplete-min.js"></script>
 	<script type="text/javascript">
 		// add onload event listener (initialize autocomplete)
 		if (window.addEventListener) {
@@ -27,8 +27,15 @@
 		.myinput {
 			width: 250px;
 		}
-		#test {
+		/* bottom menu */
+		#bottomMenu {
 			margin-top: 5px;
+		}
+		/* autocomplete instructions */
+		.text {
+			width: 600px;
+			text-align: left;
+			margin: 20px;
 		}
 	</style>
 </head>
@@ -38,17 +45,17 @@
 		<h1><a href="http://www.redips.net/javascript/autocomplete/">www.redips.net</a></h1>
 		<h2>Autocomplete without AJAX</h2>
 
-		<p>
-			Please try enter any text to the input fields. It should work in IE6, FF and Google
+		<div class="text">
+			Please try to input text in input fields. Autocomplete popup should work in IE, FF, Opera, Safari and Google
 			Chrome. Example uses PHP to generate random autocomplete answers.
-		</p>
+		</div>
 		
 		<div>
 			<input type="text" name="field1" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()"/>
 			<input type="text" name="filed2" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()" class="myinput"/>
 		</div>
 		
-		<select id="test">
+		<select id="bottomMenu">
 			<option>Google Chrome</option>
 			<option>FireFox</option>
 			<option>Internet Explorer</option>
@@ -57,14 +64,20 @@
 		</select>
 
 
-		<p>If you want to use this autocomplete, follow simple instructions:</p>
-		<div style="width: 530px; text-align: left">
+		<p></p>
+		<div class="text">
+			If you want to use this autocomplete, follow simple instructions:
+			<br/>
 			<ol>
-				<li>Include script.js file to the HTML page (only 70 lines).</li>
-				<li>In source code you will find "hidden" div. Just copy it below BODY tag.</li>
-				<li>Make div hidden - apply styles to the div with id="autocomplete".</li>
-				<li>Add onkeydown and onblur event handlers to the input fields. Don't forget to set name to the input field.</li>
-				<li>Add logic to the answers.php for typed text.</li>
+				<li>Include <strong>redips-autocomplete-min.js</strong> file (2.7KB) in HTML page.</li>
+				<li>Call <strong>REDIPS.autocomplete.init()</strong> after page is loaded (simply call from onload event handler).</li>
+				<li>Add event handlers <strong>onkeydown</strong> and <strong>onblur</strong> to input filed you want to have autocomplete option (don't forget to set name to the input field):
+					<ul>
+						<li>onkeydown="REDIPS.autocomplete.keydown(this, event)"</li>
+						<li>onblur="REDIPS.autocomplete.hide()"</li>
+					</ul>
+				</li>
+				<li>Add server logic inside redips-autocomplete.php for typed text (URL for generated options can be changed with <strong>REDIPS.autocomplete.url</strong> parameter).</li>
 			</ol>
 		</div>
 		

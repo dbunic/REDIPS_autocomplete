@@ -2,7 +2,7 @@
 Copyright (c)  2008-2011, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/dialog-box/
-Version 1.0.0
+Version 1.1.0
 Sep 05, 2011.
 */
 
@@ -22,13 +22,14 @@ var REDIPS = REDIPS || {};
  * @author Darko Bunic
  * @see
  * <a href="http://www.redips.net/javascript/autocomplete/">Autocomplete without AJAX</a>
- * @version 1.5.1
+ * @version 1.1.0
  */
 REDIPS.autocomplete = (function () {
 		// method declaration
 	var	init,
 		show,
 		hide,
+		focus,
 		keydown,
 		selected,
 		sendURL,
@@ -39,7 +40,7 @@ REDIPS.autocomplete = (function () {
 		visible = false,			// div visibility flag
 		// public properties
 		delay = 500,				// time to wait after last typed char to send request (milliseconds)
-		height = 130,				// default height of popup
+		height = 100,				// default height of popup
 		url = 'redips-autocomplete.php?query=';	// autocomplete url 
 
 
@@ -52,7 +53,7 @@ REDIPS.autocomplete = (function () {
 	init = function () {
 		var body = document.getElementsByTagName('body')[0],		// set reference to the BODY element
 			redips_autocomplete = document.createElement('div');	// create autocomplete DIV element
-		// set id, autofocus and style attribures
+		// set id, onmouseover and style attributes
 		redips_autocomplete.setAttribute('id', 'redips_autocomplete');
 		redips_autocomplete.setAttribute('onmouseover', 'REDIPS.autocomplete.focus()');
 		redips_autocomplete.setAttribute('style', 'position:absolute;visibility:hidden;background-color:white;height:' + REDIPS.autocomplete.height + 'px');
@@ -97,12 +98,25 @@ REDIPS.autocomplete = (function () {
 		div.style.visibility = 'hidden';
 	};
 
+			// set visible flag to "true" and set focus to the multiple select
+			// visible flag is needed in hide()
+	/**
+	 * Method sets focus to the popup shown below input field. It is called from keydown and from onmouseover event of popup.
+	 * DIV popup is created in init().
+	 * @public
+	 * @function
+	 * @name REDIPS.autocomplete#focus
+	 */
+	focus = function () {
+		visible = true; 
+		div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
+	};
 
 	/**
 	 * keydown() method is called on every key down in input field and popup.
 	 * In a moment when popup is shown below input field, it's possible to change focus to popup with "arrow down".
 	 * Arrow down and arrow up will change highlighting of current item.
-	 * Pressing ENTER will copy current item to the input box while pressing ESCAPE will close popup and return focus to the input field.
+	 * Pressing TAB/ENTER will copy current item to the input box while pressing ESCAPE will close popup and return focus to the input field.
 	 * @param {HTMLElement} field Input element or multiple select element (if called from iframe).
 	 * @param {Event} e Event information.
 	 * @public
@@ -153,12 +167,9 @@ REDIPS.autocomplete = (function () {
 			case 27:
 				hide();
 				break;
-			// arrow down
-			// set visible flag to "true" and set focus to the multiple select
-			// visible flag is needed in hide()
+			// arrow down (set focus to popup)
 			case 40:
-				visible = true; 
-				div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
+				focus();
 				break;
 			// backspace, delete
 			case 8:
@@ -180,7 +191,7 @@ REDIPS.autocomplete = (function () {
 				hide();
 				oInput.focus();
 				break;
-			// tab, return (set value to the input field)
+			// tab, enter (set value to the input field)
 			case 9:
 			case 13:
 				selected(field);
@@ -271,13 +282,14 @@ REDIPS.autocomplete = (function () {
 		 * Popup height (px).
 		 * @type Integer
 		 * @name REDIPS.autocomplete#height
-		 * @default 130
+		 * @default 100
 		 */
 		height : height,
 		/* public methods are documented in main code */
 		init : init,
 		show : show,
 		hide : hide,
+		focus : focus,
 		keydown : keydown,
 		selected : selected
 		
