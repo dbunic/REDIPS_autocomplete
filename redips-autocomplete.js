@@ -113,11 +113,14 @@ REDIPS.autocomplete = (function () {
 	};
 
 	/**
+	 * 
 	 * keydown() method is called on every key down in input field and popup.
-	 * In a moment when popup is shown below input field, it's possible to change focus to popup with "arrow down".
+	 * In a moment when popup is shown below input field, it's possible to
+	 * change focus to popup with "arrow down" key.
 	 * Arrow down and arrow up will change highlighting of current item.
-	 * Pressing TAB/ENTER will copy current item to the input box while pressing ESCAPE will close popup and return focus to the input field.
-	 * @param {HTMLElement} field Input element or multiple select element (if called from iframe).
+	 * Pressing TAB/ENTER will copy current item to the input box.
+	 * Pressing ESCAPE will close popup and return focus to the input field.
+	 * @param {HTMLElement} field Input element or "select multiple" element.
 	 * @param {Event} e Event information.
 	 * @public
 	 * @function
@@ -258,7 +261,7 @@ REDIPS.autocomplete = (function () {
 			// set width to the DIV element the same as width of the input field
 			div.style.width = oInput.offsetWidth + 'px';
 			// find iframe in DIV and set src attribute with parameters query and field name
-			div.getElementsByTagName('iframe')[0].src = url + oInput.value + '&fname=' + oInput.name;
+			div.getElementsByTagName('iframe')[0].src = REDIPS.autocomplete.url + oInput.value + '&fname=' + oInput.name;
 		}, REDIPS.autocomplete.delay);
 	};
 
