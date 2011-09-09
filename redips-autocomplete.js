@@ -2,7 +2,7 @@
 Copyright (c)  2008-2011, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/dialog-box/
-Version 1.1.0
+Version 1.2.0
 Sep 05, 2011.
 */
 
@@ -22,7 +22,7 @@ var REDIPS = REDIPS || {};
  * @author Darko Bunic
  * @see
  * <a href="http://www.redips.net/javascript/autocomplete/">Autocomplete without AJAX</a>
- * @version 1.1.0
+ * @version 1.2.0
  */
 REDIPS.autocomplete = (function () {
 		// method declaration
@@ -33,7 +33,9 @@ REDIPS.autocomplete = (function () {
 		keydown,
 		selected,
 		sendURL,
+		initXMLHttpClient,
 		// properties
+		request,					// XMLHttp request object
 		div,						// reference to the div that contains iframe 
 		oInput,						// current input field
 		timer = null,				// timer reference (needed to cancel previous call)
@@ -56,13 +58,44 @@ REDIPS.autocomplete = (function () {
 		// set id, onmouseover and style attributes
 		redips_autocomplete.setAttribute('id', 'redips_autocomplete');
 		redips_autocomplete.setAttribute('onmouseover', 'REDIPS.autocomplete.focus()');
-		redips_autocomplete.setAttribute('style', 'position:absolute;visibility:hidden;background-color:white;height:' + REDIPS.autocomplete.height + 'px');
+		redips_autocomplete.setAttribute('style', 'position:absolute;visibility:hidden;background-color:white;z-index:999;height:' + REDIPS.autocomplete.height + 'px');
 		// set inner HTML
 		redips_autocomplete.innerHTML = '<iframe marginwidth="0" marginheight="0" frameborder="0" width="100%" height="100%" scrolling="no"></iframe>';
 		// append dialog box and shade to the page body
 		body.appendChild(redips_autocomplete);
 		// set reference to the invisible div (after page is loaded)
 		div = document.getElementById('redips_autocomplete');
+		// initiate XMLHttp request object
+		request = initXMLHttpClient();
+	};
+
+
+	// XMLHttp request object
+	initXMLHttpClient = function () {
+		var XMLHTTP_IDS,
+			xmlhttp,
+			success = false,
+			i;
+		// Mozilla/Chrome/Safari/IE7/IE8 (normal browsers)
+		try {
+			xmlhttp = new XMLHttpRequest(); 
+		}
+		// IE (?!)
+		catch (e1) {
+			XMLHTTP_IDS = [ 'MSXML2.XMLHTTP.5.0', 'MSXML2.XMLHTTP.4.0',
+							'MSXML2.XMLHTTP.3.0', 'MSXML2.XMLHTTP', 'Microsoft.XMLHTTP' ];
+			for (i = 0; i < XMLHTTP_IDS.length && !success; i++) {
+				try {
+					success = true;
+					xmlhttp = new ActiveXObject(XMLHTTP_IDS[i]);
+				}
+				catch (e2) {}
+			}
+			if (!success) {
+				throw new Error('Unable to create XMLHttpRequest!');
+			}
+		}
+		return xmlhttp;
 	};
 
 
@@ -98,8 +131,7 @@ REDIPS.autocomplete = (function () {
 		div.style.visibility = 'hidden';
 	};
 
-			// set visible flag to "true" and set focus to the multiple select
-			// visible flag is needed in hide()
+
 	/**
 	 * Method sets focus to the popup shown below input field. It is called from keydown and from onmouseover event of popup.
 	 * DIV popup is created in init().
@@ -109,8 +141,9 @@ REDIPS.autocomplete = (function () {
 	 */
 	focus = function () {
 		visible = true; 
-		div.firstChild.contentWindow.document.getElementsByTagName('select')[0].focus();
+		div.getElementsByTagName('select')[0].focus();
 	};
+
 
 	/**
 	 * 
@@ -250,18 +283,39 @@ REDIPS.autocomplete = (function () {
 			}
 			// find input field position
 			do {
-				oLeft += box.offsetLeft;
-				oTop += box.offsetTop;
+				oLeft += box.offsetLeft - box.scrollLeft;
+				oTop += box.offsetTop - box.scrollTop;
 				box = box.offsetParent;
 			}
-			while (box && box.nodeName !== 'BODY');
+			while (box);
 			// set top and left position of DIV element regarding to input element
 			div.style.top = (oTop + oInput.offsetHeight) + 'px';
 			div.style.left = oLeft + 'px';
 			// set width to the DIV element the same as width of the input field
 			div.style.width = oInput.offsetWidth + 'px';
-			// find iframe in DIV and set src attribute with parameters query and field name
-			div.getElementsByTagName('iframe')[0].src = REDIPS.autocomplete.url + oInput.value + '&fname=' + oInput.name;
+			// open asynchronus request
+			request.open('GET', REDIPS.autocomplete.url + oInput.value + '&fname=' + oInput.name, true);
+			// the onreadystatechange event is triggered every time the readyState changes
+			request.onreadystatechange = function () {
+				var output;
+				// request finished and response is ready
+				if (request.readyState === 4) {
+					if (request.status === 200) {
+						output = '<select multiple ondblclick="REDIPS.autocomplete.selected(this)" ' +
+								'onkeydown = "REDIPS.autocomplete.keydown(this, event)" ' +
+								'onblur = "REDIPS.autocomplete.hide()" ' +
+								'style = "width:100%; height:100%">';
+						output = output + request.responseText;
+						div.innerHTML = output + '</select>';
+						show();
+					}
+					// if request status isn't OK
+					else {
+						div.innerHTML = 'Error: [' + request.status + '] ' + request.statusText;
+					}
+			    }
+			};
+			request.send(null); // send request
 		}, REDIPS.autocomplete.delay);
 	};
 
