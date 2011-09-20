@@ -11,7 +11,7 @@ text in input box. With SELECT multiple in popup and AJAX it should work in any 
 * simple
 * uses SELECT multiple and AJAX
 * popup width is automatically set to the width of input field
-* server side logic should return answers in <option></option> format
+* server side logic should return answers in &lt;option&lt;&gt;/option&gt; format
 
 ## Demos
 
