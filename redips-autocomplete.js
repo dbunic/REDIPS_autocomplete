@@ -2,12 +2,12 @@
 Copyright (c)  2008-2011, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/dialog-box/
-Version 1.2.0
-Sep 05, 2011.
+Version 1.2.1
+Sep 20, 2011.
 */
 
 /*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
-/*global window: false */
+/*global window: false, ActiveXObject: false */
 
 /* enable strict mode */
 "use strict";
@@ -17,15 +17,15 @@ var REDIPS = REDIPS || {};
 
 /**
  * @namespace
- * @description REDIPS.autocomplete is a simple JavaScript library with autocomplete functionallity.
+ * @description REDIPS.autocomplete is a simple JavaScript library with autocomplete functionality.
  * @name REDIPS.autocomplete
  * @author Darko Bunic
  * @see
- * <a href="http://www.redips.net/javascript/autocomplete/">Autocomplete without AJAX</a>
- * @version 1.2.0
+ * <a href="http://www.redips.net/javascript/autocomplete/">JavaScript autocomplete</a>
+ * @version 1.2.1
  */
 REDIPS.autocomplete = (function () {
-		// method declaration
+		// methods declaration
 	var	init,
 		show,
 		hide,
@@ -35,42 +35,49 @@ REDIPS.autocomplete = (function () {
 		sendURL,
 		initXMLHttpClient,
 		// properties
-		request,					// XMLHttp request object
-		div,						// reference to the div that contains iframe 
-		oInput,						// current input field
-		timer = null,				// timer reference (needed to cancel previous call)
-		visible = false,			// div visibility flag
+		request,				// XMLHttp request object
+		div,					// reference to the div that contains iframe 
+		oInput,					// current input field
+		timer = null,			// timer reference (needed to cancel previous call)
+		firstBlur = false,		// do not hide popup on first blur
 		// public properties
-		delay = 500,				// time to wait after last typed char to send request (milliseconds)
-		height = 100,				// default height of popup
+		delay = 500,			// time to wait after last typed char to send request (milliseconds)
+		height = 100,			// default height of popup
 		url = 'redips-autocomplete.php?query=';	// autocomplete url 
 
 
 	/**
-	 * REDIPS.autocomplete initialization. DIV element with id="redips_autocomplete" is appended to the page (needed for iframe to show options below input field).
+	 * REDIPS.autocomplete initialization. DIV element with id="redips_autocomplete" is appended to the page (needed to display autocomplete options).
 	 * @public
 	 * @function
 	 * @name REDIPS.autocomplete#init
 	 */
 	init = function () {
-		var body = document.getElementsByTagName('body')[0],		// set reference to the BODY element
-			redips_autocomplete = document.createElement('div');	// create autocomplete DIV element
-		// set id, onmouseover and style attributes
-		redips_autocomplete.setAttribute('id', 'redips_autocomplete');
-		redips_autocomplete.setAttribute('onmouseover', 'REDIPS.autocomplete.focus()');
-		redips_autocomplete.setAttribute('style', 'position:absolute;visibility:hidden;background-color:white;z-index:999;height:' + REDIPS.autocomplete.height + 'px');
-		// set inner HTML
-		redips_autocomplete.innerHTML = '<iframe marginwidth="0" marginheight="0" frameborder="0" width="100%" height="100%" scrolling="no"></iframe>';
-		// append dialog box and shade to the page body
-		body.appendChild(redips_autocomplete);
-		// set reference to the invisible div (after page is loaded)
-		div = document.getElementById('redips_autocomplete');
+		// set reference to the BODY element
+		var body = document.getElementsByTagName('body')[0];
+		// create autocomplete DIV element
+		div = document.createElement('div');	
+		// set id of DIV element
+		div.setAttribute('id', 'redips_autocomplete');
+		// set onmouseover event handler
+		div.onmouseover = REDIPS.autocomplete.focus;
+		// set styles (workaround for IE browser)
+		div.style.cssText = 'position:absolute;visibility:hidden;background-color:white;z-index:999;height:' + REDIPS.autocomplete.height + 'px';
+		// append DIV element (dialog box  to the document body
+		body.appendChild(div);
 		// initiate XMLHttp request object
 		request = initXMLHttpClient();
+		// hide popup if clicked anywhere on the page
+		// IE needs to stop event bubbling if clicking to the item in multiple select: onclick = "window.event.cancelBubble = true"
+		REDIPS.event.add(document, 'click', REDIPS.autocomplete.hide);
 	};
 
 
-	// XMLHttp request object
+	/**
+	 * XMLHttp request object created during initialization process.
+	 * @private
+	 * @memberOf REDIPS.autocomplete#
+	 */
 	initXMLHttpClient = function () {
 		var XMLHTTP_IDS,
 			xmlhttp,
@@ -100,8 +107,8 @@ REDIPS.autocomplete = (function () {
 
 
 	/**
-	 * Method shows popup (autocomplete DIV) in a moment when iframe is loaded. Only iframe calls this function from "onload" event.
-	 * Popup hieght is defined with REDIPS.autocomplete.height public property.
+	 * Method shows popup (autocomplete DIV) in a moment when AJAX request is finished and response is ready.
+	 * Popup height is defined with REDIPS.autocomplete.height public property.
 	 * @see <a href="#height">REDIPS.autocomplete.height</a>
 	 * @public
 	 * @function
@@ -119,8 +126,9 @@ REDIPS.autocomplete = (function () {
 	 * @name REDIPS.autocomplete#hide
 	 */
 	hide = function () {
-		if (visible) {
-			visible = false;
+		// if DIV element is visible then don't close popup on first blur
+		if (firstBlur) {
+			firstBlur = false;
 			return;
 		}
 		// cancel previous call
@@ -134,23 +142,22 @@ REDIPS.autocomplete = (function () {
 
 	/**
 	 * Method sets focus to the popup shown below input field. It is called from keydown and from onmouseover event of popup.
-	 * DIV popup is created in init().
+	 * DIV element for a popup is created in init() method.
 	 * @public
 	 * @function
 	 * @name REDIPS.autocomplete#focus
 	 */
 	focus = function () {
-		visible = true; 
+		firstBlur = true; 
 		div.getElementsByTagName('select')[0].focus();
 	};
 
 
 	/**
-	 * 
 	 * keydown() method is called on every key down in input field and popup.
 	 * In a moment when popup is shown below input field, it's possible to
 	 * change focus to popup with "arrow down" key.
-	 * Arrow down and arrow up will change highlighting of current item.
+	 * Arrow down and arrow up will change highlighting of the current item.
 	 * Pressing TAB/ENTER will copy current item to the input box.
 	 * Pressing ESCAPE will close popup and return focus to the input field.
 	 * @param {HTMLElement} field Input element or "select multiple" element.
@@ -238,9 +245,9 @@ REDIPS.autocomplete = (function () {
 
 
 	/**
-	 * Method copies the current item from multiple select to the input field.
-	 * Input parameter is reference to the multiple select.
-	 * This method is called from iframe on dblclick event or from keydown() method if ENTER or TAB key was pressed.
+	 * Method copies highlighted item from multiple select in popup to the upper input field.
+	 * Input parameter is reference of multiple select.
+	 * This method is called from popup on dblclick event or from keydown() method if ENTER or TAB key was pressed.
 	 * @param {HTMLElement} oSelect Multiple select element.
 	 * @public
 	 * @function
@@ -254,7 +261,6 @@ REDIPS.autocomplete = (function () {
 	};
 
 
-	// private function called if delete or backspace is pressed
 	/**
 	 * sendURL() is a private method called on every text change in input field.
 	 * After every character input, timer is restarted (default timeout is set to 500ms).
@@ -283,8 +289,8 @@ REDIPS.autocomplete = (function () {
 			}
 			// find input field position
 			do {
-				oLeft += box.offsetLeft - box.scrollLeft;
-				oTop += box.offsetTop - box.scrollTop;
+				oLeft += box.offsetLeft;
+				oTop += box.offsetTop;
 				box = box.offsetParent;
 			}
 			while (box);
@@ -298,12 +304,14 @@ REDIPS.autocomplete = (function () {
 			// the onreadystatechange event is triggered every time the readyState changes
 			request.onreadystatechange = function () {
 				var output;
-				// request finished and response is ready
+				// request is finished and response is ready
 				if (request.readyState === 4) {
 					if (request.status === 200) {
 						output = '<select multiple ondblclick="REDIPS.autocomplete.selected(this)" ' +
 								'onkeydown = "REDIPS.autocomplete.keydown(this, event)" ' +
 								'onblur = "REDIPS.autocomplete.hide()" ' +
+
+								'onclick = "window.event.cancelBubble = true" ' +
 								'style = "width:100%; height:100%">';
 						output = output + request.responseText;
 						div.innerHTML = output + '</select>';
@@ -322,17 +330,17 @@ REDIPS.autocomplete = (function () {
 
 	return {
 		/**
-		 * Time to wait after last typed char to send request (milliseconds).
+		 * Time to wait (in milliseconds) after last typed char before sending request to the server.
 		 * @type Integer
 		 * @name REDIPS.autocomplete#delay
 		 * @default 500
 		 */
 		delay : delay,
 		/**
-		 * Autocomplete URL. Server page to query for typed input.
+		 * Queried URL for typed text in input field.
 		 * @type String
 		 * @name REDIPS.autocomplete#url
-		 * @default "redips-autocomplete.php?query="
+		 * @default "./redips-autocomplete.php?query="
 		 */
 		url : url,
 		/**
@@ -353,3 +361,49 @@ REDIPS.autocomplete = (function () {
 	};
 }());
 
+
+
+// if REDIPS.event isn't already defined (from other REDIPS file) 
+if (!REDIPS.event) {
+	REDIPS.event = (function () {
+		var add,	// add event listener
+			remove;	// remove event listener
+		
+		// http://msdn.microsoft.com/en-us/scriptjunkie/ff728624
+		// http://www.javascriptrules.com/2009/07/22/cross-browser-event-listener-with-design-patterns/
+		// http://www.quirksmode.org/js/events_order.html
+
+		// add event listener
+		add = function (obj, eventName, handler) {
+			if (obj.addEventListener) {
+				// (false) register event in bubble phase (event propagates from from target element up to the DOM root)
+				obj.addEventListener(eventName, handler, false);
+			}
+			else if (obj.attachEvent) {
+				obj.attachEvent('on' + eventName, handler);
+			}
+			else {
+				obj['on' + eventName] = handler;
+			}
+		};
+	
+		// remove event listener
+		remove = function (obj, eventName, handler) {
+			if (obj.removeEventListener) {
+				obj.removeEventListener(eventName, handler, false);
+			}
+			else if (obj.detachEvent) {
+				obj.detachEvent('on' + eventName, handler);
+			}
+			else {
+				obj['on' + eventName] = null;
+			}
+		};
+	
+		return {
+			add		: add,
+			remove	: remove
+		}; // end of public (return statement)	
+		
+	}());
+}
