@@ -310,20 +310,20 @@ REDIPS.autocomplete = (function () {
 						output = '<select multiple ondblclick="REDIPS.autocomplete.selected(this)" ' +
 								'onkeydown = "REDIPS.autocomplete.keydown(this, event)" ' +
 								'onblur = "REDIPS.autocomplete.hide()" ' +
-
 								'onclick = "window.event.cancelBubble = true" ' +
 								'style = "width:100%; height:100%">';
 						output = output + request.responseText;
 						div.innerHTML = output + '</select>';
 						show();
 					}
-					// if request status isn't OK
+					// if request status is not OK then display error
 					else {
 						div.innerHTML = 'Error: [' + request.status + '] ' + request.statusText;
 					}
 			    }
 			};
-			request.send(null); // send request
+			// send request
+			request.send(null);
 		}, REDIPS.autocomplete.delay);
 	};
 
