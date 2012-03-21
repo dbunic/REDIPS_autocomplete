@@ -1,7 +1,7 @@
 /*
 Copyright (c)  2008-2011, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
-http://www.redips.net/javascript/dialog-box/
+http://www.redips.net/javascript/autocomplete/
 Version 1.2.1
 Sep 20, 2011.
 */
