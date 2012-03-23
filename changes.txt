@@ -7,4 +7,4 @@ Changes for REDIPS.autocomplete
 
 1.2.0
 - added AJAX PHP request (instead of iframe)
-- fixed problem with browser back button (problem was related to iframe) 
+- fixed problem with browser back button (problem was related to iframe)
