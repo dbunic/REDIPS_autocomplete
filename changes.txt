@@ -3,7 +3,7 @@ Changes for REDIPS.autocomplete
 1.2.1
 - fixing events
 - workaround for IE8 (cssText and onmouseover for popup DIV)
-- added onclick event document listener to hide popup (if user clicks anywhere on page, popup will be closed)
+- added onclick event document listener to hide popup (if user clicks anywhere on the page, popup will be closed)
 
 1.2.0
 - added AJAX PHP request (instead of iframe)
