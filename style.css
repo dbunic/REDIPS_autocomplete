@@ -1,0 +1,50 @@
+/*
+
+Darko Bunic
+http://www.redips.net/
+Mar, 2020.
+
+*/
+body {
+	font-family: arial;
+	margin: 0px;
+}
+
+/* header */
+div#header {
+	text-align: center;
+	margin-top: 50px;
+}
+
+/* content DIV */
+div#content {
+	margin: auto;
+	width: 720px;
+}
+
+/* ordered list */
+ol#list li {
+	margin: 10px;
+}
+
+/* define text paragraphs */
+p {
+	width: 500px;
+	text-align: justify;
+}
+/* set width for the second input field */
+.myinput {
+	width: 250px;
+}
+
+/* bottom menu */
+#bottomMenu {
+	margin-top: 5px;
+}
+
+/* autocomplete instructions */
+.text {
+	width: 650px;
+	text-align: left;
+	margin: 20px;
+}

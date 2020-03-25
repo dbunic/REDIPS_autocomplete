@@ -1,5 +1,10 @@
 Changes for REDIPS.autocomplete
 
+1.3.0 (2020-03-25)
+- REDIPS.autocomplete is checked with ESLint - cleaning and optimization
+- internal AJAX call updated
+- updated documentation
+
 1.2.1
 - fixing events
 - workaround for IE8 (cssText and onmouseover for popup DIV)

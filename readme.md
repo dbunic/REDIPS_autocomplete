@@ -1,21 +1,21 @@
-REDIPS.autocomplete 1.2.1
+REDIPS.autocomplete 1.3.0
 ============
 
-## What's REDIPS.autocomplete?
+## What is REDIPS.autocomplete?
 
-REDIPS.autocomplete is a simple JavaScript autocomplete popup. It shows options for typed
-text in input box. With SELECT multiple in popup and AJAX it should work in any browser.
+REDIPS.autocomplete is simple JavaScript autocomplete box. It shows options below input field for typed
+text. With SELECT multiple displayed in a box and AJAX it should work in any browser.
 
 ## Features
 
 * simple
 * uses SELECT multiple and AJAX
-* popup width is automatically set to the width of input field
+* width of displayed box is automatically set to the width of input field
 * server side logic should return answers in &lt;option&gt;&lt;/option&gt; format
 
 ## Demos
 
-Demo page contains several examples of REDIPS.dialog box. 
+REDIPS.dialog demo page: 
 
 * [http://www.redips.net/javascript/autocomplete/](http://www.redips.net/javascript/autocomplete/)
 

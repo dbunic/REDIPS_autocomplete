@@ -1,89 +1,75 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 	<title>www.redips.net</title>
 	<meta name="author" content="Darko Bunic"/>
-	<meta name="description" content="Autocomplete without AJAX"/>
-	<script type="text/javascript" src="redips-autocomplete.js"></script>
+	<meta name="description" content="REDIPS.autocomplete"/>
+	<link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="redips-autocomplete-min.js"></script>
+	<script type="text/javascript" src="header.js"></script>
 	<script type="text/javascript">
-		// autocomplete init function
-		function redips_init () {
+		// autocomplete initialization
+		function redipsInit () {
 			REDIPS.autocomplete.init();
 			//REDIPS.autocomplete.url = 'redips-autocomplete.php?query=';
 		}
-		// add onload event listener (initialize autocomplete)
+		// add onload event listener
 		if (window.addEventListener) {
-			window.addEventListener('load', redips_init, false);
+			window.addEventListener('load', redipsInit, false);
 		}
 		else if (window.attachEvent) {
-			window.attachEvent('onload', redips_init);
+			window.attachEvent('onload', redipsInit);
 		}
 	</script>
-	<style>
-		body{
-			font-family: Arial, Helvetica, sans-serif;
-		}
-		/* define text paragraphs */
-		p{
-			width: 500px;
-			text-align: justify;
-		}
-		/* set width for the second input field */
-		.myinput {
-			width: 250px;
-		}
-		/* bottom menu */
-		#bottomMenu {
-			margin-top: 5px;
-		}
-		/* autocomplete instructions */
-		.text {
-			width: 600px;
-			text-align: left;
-			margin: 20px;
-		}
-	</style>
 </head>
 
 <body>
-	<center>
-		<h1><a href="http://www.redips.net/javascript/autocomplete/">www.redips.net</a></h1>
-		<h2>Autocomplete without AJAX (Version 1.2.1)</h2>
+	<div id="content">
+		<div id="header">
+			<h2><a href="http://www.redips.net/javascript/autocomplete/">REDIPS.autocomplete</a></h2>
+			<h3>Simple autocomplete - Version 1.3.0</h3>
+		</div>
 
 		<div class="text">
-			Please try to input text in input fields. Autocomplete popup should work in IE, FF, Opera, Safari and Google
-			Chrome. Example uses PHP to generate random autocomplete answers.
+			Try to input text in fields below. PHP is used to generate random autocomplete answers.
 		</div>
 		
 		<div>
-			<input type="text" name="field1" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()"/>
+			<input type="text" name="field1" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()" autofocus="true"/>
 			<input type="text" name="filed2" onkeydown="REDIPS.autocomplete.keydown(this, event)" onblur="REDIPS.autocomplete.hide()" class="myinput"/>
 		</div>
 		
 		<select id="bottomMenu">
 			<option>Google Chrome</option>
 			<option>FireFox</option>
-			<option>Internet Explorer</option>
-			<option disabled="disabled">Debugging select box</option>
-			<option disabled="disabled">to check IE bug.</option>
+			<option>Safari</option>
+			<option disabled="disabled">Autocomplete box</option>
+			<option disabled="disabled">should cover this</option>
+			<option disabled="disabled">menu</option>
 		</select>
 
 		<div class="text">
-			If you want to use this autocomplete, follow simple instructions:
+			Here are instructions how to use this autocomplete:
 			<br/>
-			<ol>
-				<li>Include <strong>redips-autocomplete-min.js</strong> file (2.7KB) in HTML page.</li>
-				<li>Call <strong>REDIPS.autocomplete.init()</strong> after page is loaded (simply call from onload event handler).</li>
-				<li>Add event handlers <strong>onkeydown</strong> and <strong>onblur</strong> to input filed you want to have autocomplete option (don't forget to set name to the input field):
+			<ol id="list">
+				<li>Include <strong>redips-autocomplete-min.js</strong> in HTML page</li>
+				<li>Call <strong>REDIPS.autocomplete.init()</strong> after page is loaded</li>
+				<li>Add event handlers <strong>onkeydown</strong> and <strong>onblur</strong> to input fileds
 					<ul>
 						<li>onkeydown="REDIPS.autocomplete.keydown(this, event)"</li>
 						<li>onblur="REDIPS.autocomplete.hide()"</li>
+						<li>don't forget to set input filed name attribute (needed for server side)</li>
 					</ul>
 				</li>
-				<li>Add server logic inside redips-autocomplete.php for typed text (URL for generated options can be changed with <strong>REDIPS.autocomplete.url</strong> parameter).</li>
+				<li>Add server logic inside redips-autocomplete.php for typed text
+					<ul>
+						<li>server side logic should return answers in &lt;option&gt;&lt;/option&gt; format</li>
+						<li>URL can be changed with <strong>REDIPS.autocomplete.url</strong></li>
+					</ul>
+				
 			</ol>
 		</div>
 		
-	</center>
+	</div>
 </body>
 </html>
